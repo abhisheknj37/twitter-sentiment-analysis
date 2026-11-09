@@ -3,3 +3,4 @@ pandas
 nltk
 matplotlib
 scikit-learn
+streamlit>=1.41,<2
