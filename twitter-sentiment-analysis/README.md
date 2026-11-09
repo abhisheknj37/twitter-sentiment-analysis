@@ -1,5 +1,8 @@
 # Twitter Sentiment Analysis
 
+<escape>🚀 Live Demo: https://twitter-sentiment-analysis-ovp6.onrender.com</escape>  
+> Streamlit demo supports single-text sentiment checks and CSV uploads with a `tweet` column.
+
 A small Python NLP project that scores tweets with NLTK VADER and labels each row as positive, negative or neutral.
 
 ## Requirements
