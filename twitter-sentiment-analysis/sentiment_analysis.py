@@ -1,48 +1,47 @@
-import numpy as np
-import pandas as pd
+from pathlib import Path
+
 import nltk
-from nltk.corpus import stopwords
-from nltk.sentiment import SentimentIntensityAnalyzer
+import pandas as pd
 import matplotlib.pyplot as plt
+from nltk.sentiment import SentimentIntensityAnalyzer
 
-# download nltk data
-nltk.download('vader_lexicon')
-nltk.download('stopwords')
+BASE_DIR = Path(__file__).resolve().parent
+DATASET = BASE_DIR / "dataset.csv"
 
-# load dataset
-data = pd.read_csv("dataset.csv")
-
-print(data.head())
-
-# initialize sentiment analyzer
-sia = SentimentIntensityAnalyzer()
-
-sentiments = []
-
-for tweet in data['tweet']:
-    score = sia.polarity_scores(tweet)
-    sentiments.append(score['compound'])
-
-data['sentiment_score'] = sentiments
 
 def label(score):
     if score > 0:
         return "Positive"
-    elif score < 0:
+    if score < 0:
         return "Negative"
-    else:
-        return "Neutral"
+    return "Neutral"
 
-data['sentiment'] = data['sentiment_score'].apply(label)
 
-print(data.head())
+def main():
+    if not DATASET.is_file():
+        raise FileNotFoundError(f"Dataset not found: {DATASET}")
 
-# count results
-result = data['sentiment'].value_counts()
+    data = pd.read_csv(DATASET)
+    if "tweet" not in data.columns:
+        raise ValueError("dataset.csv must contain a 'tweet' column")
 
-print(result)
+    nltk.download("vader_lexicon", quiet=True)
+    analyzer = SentimentIntensityAnalyzer()
+    data["tweet"] = data["tweet"].fillna("").astype(str)
+    data["sentiment_score"] = data["tweet"].map(
+        lambda tweet: analyzer.polarity_scores(tweet)["compound"]
+    )
+    data["sentiment"] = data["sentiment_score"].map(label)
 
-# plot graph
-result.plot(kind='bar')
-plt.title("Twitter Sentiment Analysis")
-plt.show()
+    print(data.head())
+    print(data["sentiment"].value_counts())
+
+    data["sentiment"].value_counts().plot(kind="bar", title="Twitter Sentiment Analysis")
+    plt.xlabel("Sentiment")
+    plt.ylabel("Tweet count")
+    plt.tight_layout()
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
